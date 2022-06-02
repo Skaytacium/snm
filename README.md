@@ -1,6 +1,7 @@
 # snm
 
 ## Simple Node Manager
+## This project is not complete!
 
 ### What?
 
