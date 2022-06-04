@@ -1,12 +1,21 @@
-use clap::{Parser};
+use clap::Parser;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Cli {
-	/// Version to operate on.
-	version: Option<String>,
+	/// View installed path
+	#[clap(short, long)]
+	pub path: bool,
+
+	/// View installed versions
+	#[clap(short, long)]
+	pub list: bool,
 
 	/// Install a version
-	#[clap(short, long, parse(from_flag))]
-	install: u8
+	#[clap(short, long)]
+	pub install: Option<String>,
+
+	/// Remove a version
+	#[clap(short, long)]
+	pub remove: Option<String>,
 }

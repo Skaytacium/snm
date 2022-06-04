@@ -1,6 +1,6 @@
 [package]
 name = "snm"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/Skaytacium/snm"
 license = "MIT"
@@ -9,5 +9,7 @@ readme = "README.md"
 [dependencies]
 reqwest = { version = "0.11.10", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
+serde_json = "*"
 tokio = { version = "1.18.2", features = ["full"] }
 clap = { version = "3.1.18", features = ["derive"] }
+home = "*"
