@@ -10,6 +10,7 @@ A minimalistic [node.js](https://nodejs.org/) installation manager written in [R
 ### Why?
 
 The alternatives are shell scripts and don't directly link `node` in my path.  
+They also have an insane amount of useless options and bash completion???  
 I also wanted to learn Rust.
 
 ### How?

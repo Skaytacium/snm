@@ -22,19 +22,28 @@ pub fn get_saved(path: &crate::typings::Dir) -> typings::Saved {
 		}
 		Err(_) => {
 			super::init::make_default_config(&path)
-				.expect("could not create required directories/files");
+				.expect("couldn't create required directories/files");
 			get_saved(&path)
 		}
 	}
 }
 
-pub fn save(path: &crate::typings::Dir, saved: &typings::Saved) {
-	let mut file = File::create(path.saved()).expect("could not open ~/.snm/saved in write more");
+pub fn save(path: &crate::typings::Dir, saved: &typings::Saved) -> Result<(), String> {
+	if get_saved(&path).current != saved.current {
+		super::netio::use_version(&saved.current, &path)?;
+	}
 
-	file.write(
+	let mut file = match File::create(path.saved()) {
+		Ok(f) => f,
+		Err(_) => return Err("couldn't open ~/.snm/saved in write more".to_string()),
+	};
+
+	match file.write(
 		&serde_json::to_string(saved)
 			.expect("couldn't convert to json")
 			.as_bytes(),
-	)
-	.expect("could not write to ~/.snm/saved");
+	) {
+		Ok(_) => return Ok(()),
+		Err(_) => return Err("couldn't write to file".to_string()),
+	}
 }

@@ -24,11 +24,13 @@ pub struct Saved {
 
 pub struct Dir {
 	pub home: PathBuf,
+	pub os: String,
+	pub ext: String,
 }
 
 impl Dir {
 	pub fn bin(&self) -> PathBuf {
-		self.home.join("bin").join("node")
+		self.home.join("bin")
 	}
 
 	pub fn saved(&self) -> PathBuf {
@@ -36,7 +38,9 @@ impl Dir {
 	}
 
 	pub fn version(&self, version: &str) -> PathBuf {
-		self.home.join("versions").join(version)
+		self.home
+			.join("versions")
+			.join(format!("{}.{}", version, self.ext))
 	}
 }
 

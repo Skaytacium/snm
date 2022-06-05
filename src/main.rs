@@ -8,8 +8,7 @@ use clap::Parser;
 
 use crate::typings::EntryList;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
 	// (OS, extension)
 	let file = match std::env::consts::OS {
 		"linux" => ("linux-x64", "tar.xz"),
@@ -17,30 +16,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 		"macos" => ("darwin-x64", "tar.xz"),
 		_ => {
 			println!("OS not supported");
-			return Ok(());
+			return;
 		}
 	};
 
 	let path = match home::home_dir() {
 		Some(dir) => typings::Dir {
 			home: dir.join(".snm"),
+			os: file.0.to_string(),
+			ext: file.1.to_string(),
 		},
 		None => {
 			println!("user home not found");
-			return Ok(());
+			return;
 		}
 	};
 
-	let cli = ui::Cli::parse();
+	drop(file);
 
+	let cli = ui::Cli::parse();
 	let mut saved = util::saved::get_saved(&path);
 
 	if cli.path {
-		println!("{}", path.bin().display());
+		println!("{}", path.bin().join("node").display());
 	} else if let Some(input) = cli.remove {
 		match util::get_version(&input, &saved.available) {
 			Ok(v) => {
 				println!("removing {}...", &v);
+				match util::netio::remove(&v, &path) {
+					Ok(_) => (),
+					Err(e) => {
+						println!("{}", e);
+						return;
+					}
+				}
 
 				let pos = saved
 					.available
@@ -58,9 +67,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 					saved.available.remove(pos);
 				}
 
-				// TODO: implement removing a version
-
-				util::saved::save(&path, &saved);
+				match util::saved::save(&path, &saved) {
+					Ok(_) => (),
+					Err(e) => {
+						println!("{}", e);
+						return;
+					}
+				};
 			}
 			Err(e) => println!("{}", e),
 		}
@@ -69,18 +82,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			Ok(v) => {
 				println!("using {}", v);
 
-				// TODO: implement changing the version
-
 				saved.current = v.clone();
-				util::saved::save(&path, &saved);
+				match util::saved::save(&path, &saved) {
+					Ok(_) => (),
+					Err(e) => {
+						println!("{}", e);
+						return;
+					}
+				};
 			}
 			Err(e) => println!("{}", e),
 		}
 	} else {
-		let resp = reqwest::get("https://nodejs.org/dist/index.json")
-			.await?
-			.json::<Vec<typings::Entry>>()
-			.await?;
+		let resp = serde_json::from_str::<Vec<typings::Entry>>(
+			&ureq::get("https://nodejs.org/dist/index.json")
+				.call()
+				.expect("couldn't send request")
+				.into_string()
+				.expect("couldn't decode response")[..],
+		)
+		.expect("couldn't parse json");
 
 		if let Some(input) = cli.install {
 			match util::get_version(&input, &resp) {
@@ -89,23 +110,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 					if let Some(_) = saved.available.get_from_version(v) {
 						println!("{} already installed", &v);
-						return Ok(());
+						return;
 					}
 
 					println!("installing {}...", &v);
-
-					let link = format!(
-						"https://nodejs.org/dist/{}/node-{}-{}.{}",
-						&v, &v, &file.0, &file.1
-					); //TODO: implement actually downloading the file
-					println!("{}", link);
+					match util::netio::download(v, &path) {
+						Ok(_) => (),
+						Err(e) => {
+							println!("{}", e);
+							return;
+						}
+					};
 
 					if &saved.current[..] == "" || entry > saved.available.get(0).unwrap() {
 						saved.current = entry.version.clone()
 					}
 					saved.available.push(entry.clone());
 
-					util::saved::save(&path, &saved);
+					match util::saved::save(&path, &saved) {
+						Ok(_) => (),
+						Err(e) => {
+							println!("{}", e);
+							return;
+						}
+					};
 				}
 				Err(e) => println!("{}", e),
 			}
@@ -116,6 +144,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 			);
 		}
 	}
-
-	Ok(())
 }
