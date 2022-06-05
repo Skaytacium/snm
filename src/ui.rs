@@ -3,19 +3,22 @@ use clap::Parser;
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 pub struct Cli {
-	/// View installed path
+	/// use this version
+	pub version: Option<String>,
+
+	/// view installed path
 	#[clap(short, long)]
 	pub path: bool,
 
-	/// View installed versions
+	/// view installed versions
 	#[clap(short, long)]
 	pub list: bool,
 
-	/// Install a version
+	/// install a version
 	#[clap(short, long)]
 	pub install: Option<String>,
 
-	/// Remove a version
+	/// remove a version
 	#[clap(short, long)]
 	pub remove: Option<String>,
 }

@@ -26,16 +26,14 @@ $ snm -l
 * 13.14.0
 
 $ snm -i latest
-Installing 18.3.0...
+installing 18.3.0...
 
 $ snm -r 13
 Removing 13.14.0...
+using 17.9.1
 
 $ snm -i lts
-Installing 16.15.1...
-
-$ snm 17
-Using 17.9.1...
+installing 16.15.1...
 
 $ snm -l
 - 18.3.0 (latest)
@@ -43,24 +41,20 @@ $ snm -l
 - 16.15.1 (lts)
 
 $ snm -r using
-Removing 17.9.1
-
-$ snm latest
-Using 18.3.0
+removing 17.9.1...
+using 18.3.0
 
 $ snm -r latest
-Removing 18.3.0...
+removing 18.3.0...
+using 16.15.1
 
 $ snm -l
-- 16.15.1 (lts)
+* 16.15.1 (lts)
 ```
 
 ### And?
 
-- `snm` **does not make the** `~/.snm` **folder, please make this yourself as I am too lazy to implement it, thanks.**
-	- You will get errors if you don't do this (stuff like `The system cannot find the path specified`).
-- `snm` by default will use the highest version available when specifying `lts` or `15`.
-- `snm` will not use any node version if not specified (as seen above).
+- `snm` by default will use the highest version.
 - `snm` installs node in `~/snm/bin` to avoid root perms.
 	- [I know...](#why) (just symlink `~/.snm/bin/node` to `/usr/bin/local/node`).
 

@@ -1,22 +1,19 @@
-use std::{
-	fs::File,
-	io::{Read, Write},
-};
+pub mod init;
+pub mod saved;
 
-pub fn parse_version<'a>(
+use crate::typings;
+use typings::EntryList;
+
+pub fn get_version<'a>(
 	input: &String,
-	response: &'a Vec<crate::Entry>,
+	response: &'a Vec<typings::Entry>,
 ) -> Result<&'a String, String> {
 	match &input[..] {
 		"latest" => Ok(&response.get(0).unwrap().version),
-		"lts" => {
-			for entry in response {
-				if let crate::Lts::Version(_) = entry.lts {
-					return Ok(&entry.version);
-				};
-			}
-			return Err("No LTS versions available".to_string());
-		}
+		"lts" => match &response.get_latest_lts() {
+			Some(v) => Ok(&v.version),
+			None => Err("no LTS version available".to_string()),
+		},
 		_ => {
 			let version = if &input[..1] != "v" {
 				format!("v{}", &input)
@@ -29,44 +26,12 @@ pub fn parse_version<'a>(
 					return Ok(&entry.version);
 				}
 			}
-			return Err("Specified version not found".to_string());
+			return Err("version not available".to_string());
 		}
 	}
 }
 
-pub fn get_link(version: &String, file_tuple: &(&str, &str)) -> String {
-	format!(
-		"https://nodejs.org/dist/{}/node-{}-{}.{}",
-		&version, &version, &file_tuple.0, &file_tuple.1
-	)
-}
-
-pub fn get_saved(path: &std::path::PathBuf) -> crate::Saved {
-	let file = File::open(&path);
-
-	match file {
-		Ok(mut f) => {
-			let mut file_contents = String::new();
-			f.read_to_string(&mut file_contents).unwrap();
-
-			match serde_json::from_str(&file_contents) {
-				Ok(o) => return o,
-				Err(_) => {
-					panic!("Saved data corrupt...");
-				}
-			}
-		}
-		Err(_) => {
-			let mut file = File::create(&path).unwrap();
-			file.write_all(b"{\"current\": \"\", \"available\": []}")
-				.unwrap();
-
-			return get_saved(path);
-		}
-	}
-}
-
-pub fn make_list(saved: crate::Saved, response: &Vec<crate::Entry>) -> Vec<String> {
+pub fn make_list(saved: typings::Saved, response: &Vec<typings::Entry>) -> Vec<String> {
 	let mut list: Vec<String> = Vec::new();
 
 	for i in 0..saved.available.len() {
@@ -83,15 +48,25 @@ pub fn make_list(saved: crate::Saved, response: &Vec<crate::Entry>) -> Vec<Strin
 			list[i].push_str(" (latest)");
 		}
 
-		for entry in response {
-			if let crate::Lts::Version(_) = entry.lts {
-				if entry.version == e.version {
-					list[i].push_str(" (lts)");
+		match &response.get_latest_lts() {
+			Some(v) => {
+				if e.version == v.version {
+					list[i].push_str(" (lts)")
 				}
-				break;
-			};
+			}
+			None => (),
 		}
 	}
 
 	list
+}
+
+pub fn parse_version(version: &String) -> [u8; 3] {
+	let temp: Vec<&str> = version[1..].split(".").collect();
+
+	[
+		temp[0].parse().unwrap(),
+		temp[1].parse().unwrap(),
+		temp[2].parse().unwrap(),
+	]
 }
