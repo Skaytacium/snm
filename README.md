@@ -1,15 +1,15 @@
 # snm
 
 ## Simple Node Manager
-## This project is not complete!
+## This project is complete!
 
 ### What?
 
-A minimalistic [node.js](https://nodejs.org/) installation manager written in [Rust](https://www.rust-lang.org/).
+A minimalistic [node.js](https://nodejs.org/) installation manager written in Rust.
 
 ### Why?
 
-The alternatives are shell scripts and don't directly link `node` in my path.  
+The alternatives are shell scripts and don't add install in a common directory.  
 They also have an insane amount of useless options and bash completion???  
 I also wanted to learn Rust.
 
@@ -17,56 +17,52 @@ I also wanted to learn Rust.
 
 ```
 $ snm
-18.3.0
-
-$ snm -p
-/usr/local/bin/node
+13.14.0
 
 $ snm -l
-- 17.9.1 (installed)
-* 13.14.0 (installed)
+= 17.9.1
+* 13.14.0
 
 $ snm -i latest
-downloading 18.3.0...
++ 18.3.0
 
 $ snm -r 13
-removing 13.14.0
-installing 18.3.0...
-using 18.3.0
+- 13.14.0
+* 18.3.0
 
 $ snm -i lts
-downloading 16.15.1...
++ 16.15.1
 
 $ snm -l
-* 18.3.0 (latest) (installed)
-- 17.9.1 (installed)
-- 16.15.1 (lts)
+* 18.3.0 (latest)
+= 17.9.1
+= 16.15.1 (lts)
 
 $ snm -r 18
-removing 18.3.0
-using 17.9.1
+- 18.3.0
+* 17.9.1
 
 $ snm -r 17
-removing 17.9.1
-installing 16.15.1...
-using 16.15.1
+- 17.9.1
+* 16.15.1
 
 $ snm -l
-* 16.15.1 (lts) (installed)
+* 16.15.1 (lts)
 ```
 
 ### And?
 
-- `snm` will only install a version (extract) when it is used; first time uses will take time.
 - `snm` by default will use the highest version.
-- `snm` installs node in `~/snm/bin` to avoid root perms.
-	- [I know...](#why) (just symlink `~/.snm/bin/node` to `/usr/bin/local/node`).
+- `snm` installs node in `~/.snm/bin` on Windows and in `/usr/local/bin` on Linux and macOS.
 
 | Key | Meaning |
 | --- | --- |
-| `latest` | The *latest* node version that is available (**Note:** available, not installed) |
+| `latest` | The *latest* node version that is available |
 | `lts` | The latest *lts* node version that is available |
+
+(**Note:** available, not installed)
 
 ### Todo?
 
 - Add support for different architectures (currently only x86_64)
+	- I probably won't do this and will wait for a PR if this blows up.
