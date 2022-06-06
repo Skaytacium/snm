@@ -29,18 +29,16 @@ pub struct Dir {
 }
 
 impl Dir {
-	pub fn bin(&self) -> PathBuf {
-		self.home.join("bin")
-	}
-
-	pub fn saved(&self) -> PathBuf {
-		self.home.join("saved")
-	}
-
-	pub fn version(&self, version: &str) -> PathBuf {
-		self.home
-			.join("versions")
-			.join(format!("{}.{}", version, self.ext))
+	pub fn version(&self, version: &str, ext: bool) -> PathBuf {
+		self.home.join("versions").join(format!(
+			"{}{}",
+			version,
+			if ext {
+				format!(".{}", self.ext)
+			} else {
+				"".to_string()
+			}
+		))
 	}
 }
 

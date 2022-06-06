@@ -128,3 +128,19 @@ mod equal {
 		assert!(a == b)
 	}
 }
+
+// mod netio {
+// 	use crate::util::netio::recurse_move_dir;
+// 	use std::path;
+
+// 	#[test]
+// 	fn recurse_move_dir_test() {
+// 		if let Err(e) = recurse_move_dir(
+// 			&path::Path::new("C:/Users/Sid/.snm/versions/v18.3.0/node-v18.3.0-win-x64")
+// 				.to_path_buf(),
+// 			&path::Path::new("C:/Users/Sid/.snm/versions/v18.3.0").to_path_buf(),
+// 		) {
+// 			println!("{}", e)
+// 		}
+// 	}
+// }

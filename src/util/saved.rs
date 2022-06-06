@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{Read, Write};
 
 pub fn get_saved(path: &crate::typings::Dir) -> typings::Saved {
-	let file = File::open(&path.saved());
+	let file = File::open(&path.home.join("saved"));
 
 	match file {
 		Ok(mut f) => {
@@ -17,7 +17,7 @@ pub fn get_saved(path: &crate::typings::Dir) -> typings::Saved {
 					o.available.reverse();
 					o
 				}
-				Err(_) => panic!("saved data corrupt..."),
+				Err(_) => panic!("saved data corrupt"),
 			}
 		}
 		Err(_) => {
@@ -28,14 +28,14 @@ pub fn get_saved(path: &crate::typings::Dir) -> typings::Saved {
 	}
 }
 
-pub fn save(path: &crate::typings::Dir, saved: &typings::Saved) -> Result<(), String> {
-	if get_saved(&path).current != saved.current {
-		super::netio::use_version(&saved.current, &path)?;
+pub fn save(path: &crate::typings::Dir, saved: &typings::Saved) -> Result<(), &'static str> {
+	if get_saved(&path).current != saved.current || !&path.home.join("bin").join("node").exists() {
+		super::netio::use_version(&saved.current, &path)?
 	}
 
-	let mut file = match File::create(path.saved()) {
+	let mut file = match File::create(path.home.join("saved")) {
 		Ok(f) => f,
-		Err(_) => return Err("couldn't open ~/.snm/saved in write more".to_string()),
+		Err(_) => return Err("couldn't open ~/.snm/saved in write more"),
 	};
 
 	match file.write(
@@ -44,6 +44,6 @@ pub fn save(path: &crate::typings::Dir, saved: &typings::Saved) -> Result<(), St
 			.as_bytes(),
 	) {
 		Ok(_) => return Ok(()),
-		Err(_) => return Err("couldn't write to file".to_string()),
+		Err(_) => return Err("couldn't write to file"),
 	}
 }

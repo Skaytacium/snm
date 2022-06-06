@@ -38,11 +38,11 @@ fn main() {
 	let mut saved = util::saved::get_saved(&path);
 
 	if cli.path {
-		println!("{}", path.bin().join("node").display());
+		println!("{}", path.home.join("bin").join("node").display());
 	} else if let Some(input) = cli.remove {
 		match util::get_version(&input, &saved.available) {
 			Ok(v) => {
-				println!("removing {}...", &v);
+				println!("removing {}", &v);
 				match util::netio::remove(&v, &path) {
 					Ok(_) => (),
 					Err(e) => {
@@ -80,8 +80,6 @@ fn main() {
 	} else if let Some(input) = cli.version {
 		match util::get_version(&input, &saved.available) {
 			Ok(v) => {
-				println!("using {}", v);
-
 				saved.current = v.clone();
 				match util::saved::save(&path, &saved) {
 					Ok(_) => (),
@@ -113,7 +111,7 @@ fn main() {
 						return;
 					}
 
-					println!("installing {}...", &v);
+					println!("downloading {}...", &v);
 					match util::netio::download(v, &path) {
 						Ok(_) => (),
 						Err(e) => {
@@ -140,7 +138,7 @@ fn main() {
 		} else if cli.list {
 			println!(
 				"{}",
-				util::make_list(util::saved::get_saved(&path), &resp).join("\n")
+				util::make_list(util::saved::get_saved(&path), &resp, &path).join("\n")
 			);
 		}
 	}
