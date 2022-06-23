@@ -6,10 +6,6 @@ pub struct Cli {
 	/// use this version
 	pub version: Option<String>,
 
-	/// view installed path
-	#[clap(short, long)]
-	pub path: bool,
-
 	/// view installed versions
 	#[clap(short, long)]
 	pub list: bool,
